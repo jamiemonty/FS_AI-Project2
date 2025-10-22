@@ -64,33 +64,68 @@ def plot_chart(df, signals, ticker, year):
     fig.savefig(f"plots/{ticker}_{year}.png"); plt.close(fig)
 
 def backtest_year(year):
-    all_trades, compound_returns = [], {}
+    all_signals = []
+    df_map = {}
+
+    # Collect signals from all tickers for the given year
     for csv in glob.glob("YahooStockData/*.csv"):
         ticker = os.path.basename(csv).replace(".csv", "")
         df = pd.read_csv(csv)
-        df["Date"] = pd.to_datetime(df["Date"]); df.set_index("Date", inplace=True)
+        df["Date"] = pd.to_datetime(df["Date"])
+        df.set_index("Date", inplace=True)
         df = df[df.index.year == year]
-        if len(df) < period: continue
+        if len(df) < period:
+            continue
         df = calculate_bands(df).dropna()
         signals = find_signals(df)
-        if not signals: continue
-
-        capital = initial_capital
-        for s in signals:
-            shares = capital / s[1]
-            capital = shares * s[3]
-
-        compound_returns[ticker] = (capital - initial_capital) / initial_capital * 100
+        if not signals:
+            continue
+        df_map[ticker] = df
         for s in signals:
             pct = (s[3] - s[1]) / s[1] * 100
-            all_trades.append([ticker, s[0], s[1], s[2], s[3], pct, s[4], s[5]])
-        plot_chart(df, signals, ticker, year)
+            # store as list: ticker, buy_date, buy_price, sell_date, sell_price, profit_pct, %Below_Lower, days_held
+            all_signals.append([ticker, s[0], s[1], s[2], s[3], pct, s[4], s[5]])
 
-    if all_trades:
-        pd.DataFrame(all_trades, columns=["Ticker","Buy_Date","Buy_Price","Sell_Date","Sell_Price",
-                                          "Profit%","%Below_Lower","Days_Held"]).to_csv(f"{year}_perf.csv", index=False)
-    avg_return = np.mean(list(compound_returns.values())) if compound_returns else 0
-    return avg_return
+    # If no signals across all tickers, return 0
+    if not all_signals:
+        return 0
+
+    # Sort by buy date, and prefer higher profit on the same buy date
+    all_signals.sort(key=lambda x: (x[1], -x[5]))
+
+    capital = initial_capital
+    executed_trades = []
+    # Next date when we are allowed to open a new trade; start of the year
+    next_available_date = pd.Timestamp(year=year, month=1, day=1)
+
+    for sig in all_signals:
+        ticker, buy_date, buy_price, sell_date, sell_price, pct, below, days_held = sig
+        # Only take the trade if its buy date is on/after the next available date
+        if buy_date >= next_available_date:
+            # Execute trade with full capital
+            shares = capital / buy_price
+            capital = shares * sell_price
+            executed_trades.append([ticker, buy_date, buy_price, sell_date, sell_price, pct, below, days_held])
+            # update next available date: can buy on the sell day or later
+            next_available_date = sell_date
+            # plot only executed trade signals for clarity
+            try:
+                df = df_map.get(ticker)
+                if df is not None:
+                    # recreate the original signal tuple format for plotting
+                    plot_signals = [(buy_date, buy_price, sell_date, sell_price, below, days_held)]
+                    plot_chart(df, plot_signals, ticker, year)
+            except Exception:
+                pass
+
+    # Save executed trades for the year
+    if executed_trades:
+        pd.DataFrame(executed_trades, columns=["Ticker","Buy_Date","Buy_Price","Sell_Date","Sell_Price",
+                                               "Profit%","%Below_Lower","Days_Held"]).to_csv(f"{year}_perf.csv", index=False)
+
+    # Compound return for the year based on sequential single-asset execution
+    compound_return = (capital - initial_capital) / initial_capital * 100
+    return compound_return
 
 def multi_year_backtest():
     os.makedirs("plots", exist_ok=True)

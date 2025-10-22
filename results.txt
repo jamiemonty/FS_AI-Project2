@@ -2,48 +2,21 @@ Strategy Description:
 We use daily Adj Close prices to generate buy signals when the price falls below the lower Bollinger Band (20-day, 2σ), provided the deviation is >2% and volume >100k. Sell when the price crosses the SMA or after 30 days. Capital compounds after each trade.
 
 GPT Prompt:
-GPT PROMPT RECORD – AI-PRODUCED PROJECT (Jamie Montgomery)
---------------------------------------------------------------------
-The goal is to create a python project that uses downloaded daily S&P500 ticker
-data over the past 25 years (stock files are included in `YahooStockData/`). Use
-GPT to find combinations of indicators to produce buy and sell signals and then
-generate working Python code that:
-
-- Backtests the strategy for a specific year (set by `theYear = 2024` at the
-	top of the script so it is easy to change).
-- Exposes indicator parameters as variables (e.g., `period`, `std_factor`, and
-	`max_hold_days`) so you can tune them from the top of the file.
-- Produces a trade spreadsheet with columns: Ticker, Buy Date, Buy Price, Sell
-	Date, Sell Price, Percentage Profit, % Below Lower Band, Days Held, and
-	saves it to `{theYear}_perf.csv`.
-- Allows the variables to be tuned so the backtest yields a manageable number of
-	trades (for example ~50 trades) when required.
-- Generates candlestick charts (saved in `plots/`) using `mplfinance`, overlays
-	Bollinger Bands and marks buy/sell signals clearly with dashed vertical lines.
-
-Summary of Implemented Features
---------------------------------------------------------------------
-• Uses Bollinger Bands (SMA ± 2×STD) to generate buy/sell signals.
-• Year, SMA period, and standard deviation factor are adjustable variables.
-• Backtests all tickers automatically from `YahooStockData/`.
-• Creates a trade spreadsheet with detailed metrics.
-• Generates candlestick charts with Bollinger Bands and buy/sell signals.
-• Saves charts to `plots/` and results to `{theYear}_perf.csv`.
-• Adds compounded return calculations per stock and writes a results summary.
+Create a stock trading strategy using Bollinger Bands with compound returns tracking
 
 Multi-Year Backtest Results (2014–2025)
 ==================================================
-Finished processing year 2025. Compounded gain: 4.75%
-Finished processing year 2024. Compounded gain: 4.22%
-Finished processing year 2023. Compounded gain: 2.21%
-Finished processing year 2022. Compounded gain: 5.34%
-Finished processing year 2021. Compounded gain: 5.02%
-Finished processing year 2020. Compounded gain: -8.01%
-Finished processing year 2019. Compounded gain: 2.21%
-Finished processing year 2018. Compounded gain: 3.79%
-Finished processing year 2017. Compounded gain: 1.31%
-Finished processing year 2016. Compounded gain: 7.16%
-Finished processing year 2015. Compounded gain: 3.79%
-Finished processing year 2014. Compounded gain: 5.10%
+Finished processing year 2025. Compounded gain: -34.67%
+Finished processing year 2024. Compounded gain: 83.90%
+Finished processing year 2023. Compounded gain: 70.63%
+Finished processing year 2022. Compounded gain: 44.34%
+Finished processing year 2021. Compounded gain: 29.40%
+Finished processing year 2020. Compounded gain: 5.41%
+Finished processing year 2019. Compounded gain: 87.93%
+Finished processing year 2018. Compounded gain: 81.35%
+Finished processing year 2017. Compounded gain: 31.70%
+Finished processing year 2016. Compounded gain: 110.44%
+Finished processing year 2015. Compounded gain: 45.75%
+Finished processing year 2014. Compounded gain: -22.50%
 
-Final Compounded Return (2014–2025): 1.427x
+Final Compounded Return (2014–2025): 43.065x
