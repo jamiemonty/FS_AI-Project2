@@ -2,7 +2,23 @@ Strategy Description:
 We use daily Adj Close prices to generate buy signals when the price falls below the lower Bollinger Band (20-day, 2σ), provided the deviation is >2% and volume >100k. Sell when the price crosses the SMA or after 30 days. Capital compounds after each trade.
 
 GPT Prompt:
-Create a stock trading strategy using Bollinger Bands with compound returns tracking
+The goal is to create a python project that uses downloaded daily S&P500 ticker
+data over the past 25 years (stock files are included in `YahooStockData/`). Use
+GPT to find combinations of indicators to produce buy and sell signals and then
+generate working Python code that:
+
+- Backtests the strategy for a specific year (set by `theYear = 2024` at the
+	top of the script so it is easy to change).
+- Exposes indicator parameters as variables (e.g., `period`, `std_factor`, and
+	`max_hold_days`) so you can tune them from the top of the file.
+- Produces a trade spreadsheet with columns: Ticker, Buy Date, Buy Price, Sell
+	Date, Sell Price, Percentage Profit, % Below Lower Band, Days Held, and
+	saves it to `{theYear}_perf.csv`.
+- Allows the variables to be tuned so the backtest yields a manageable number of
+	trades (for example ~50 trades) when required.
+- Generates candlestick charts (saved in `plots/`) using `mplfinance`, overlays
+	Bollinger Bands and marks buy/sell signals clearly with dashed vertical lines.
+
 
 Multi-Year Backtest Results (2014–2025)
 ==================================================
